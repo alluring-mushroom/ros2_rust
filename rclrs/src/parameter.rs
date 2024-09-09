@@ -18,6 +18,8 @@ use std::{
     sync::{Arc, Mutex, RwLock, Weak},
 };
 
+use thiserror::Error;
+
 // This module implements the core logic of parameters in rclrs.
 // The implementation is fairly different from the existing ROS 2 client libraries. A detailed
 // explanation of the core differences and why they have been implemented is available at:
@@ -614,27 +616,20 @@ pub struct Parameters<'a> {
 }
 
 /// Describes errors that can be generated when trying to set a parameter's value.
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum ParameterValueError {
+    #[error("parameter value was out of the parameter's range")]
     /// Parameter value was out of the parameter's range.
     OutOfRange,
     /// Parameter was stored in a static type and an operation on a different type was attempted.
+    #[error(
+        "parameter is stored in a static type and an operation on a different type was attempted"
+    )]
     TypeMismatch,
     /// A write on a read-only parameter was attempted.
+    #[error("a write on a read-only parameter was attempted")]
     ReadOnly,
 }
-
-impl std::fmt::Display for ParameterValueError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ParameterValueError::OutOfRange => write!(f, "parameter value was out of the parameter's range"),
-            ParameterValueError::TypeMismatch => write!(f, "parameter was stored in a static type and an operation on a different type was attempted"),
-            ParameterValueError::ReadOnly => write!(f, "a write on a read-only parameter was attempted"),
-        }
-    }
-}
-
-impl std::error::Error for ParameterValueError {}
 
 /// Error that can be generated when doing operations on parameters.
 #[derive(Debug)]
